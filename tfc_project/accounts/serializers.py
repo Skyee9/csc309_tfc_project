@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from accounts.models import CustomUser, Card
+from accounts.models import CustomUser, Card, Payment
 from datetime import date
+from dateutil import relativedelta
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -23,9 +24,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'password', 'password2', 'email', 'phone_num', 'avatar',
-                  'first_name', 'last_name', 'is_subscribed']
-        partial = True
+        fields = ['pk', 'username', 'password', 'password2', 'email', 'phone_num', 'avatar',
+                  'first_name', 'last_name', 'is_subscribed', 'pmt_option']
 
     def validate(self, data):
         if data["password"] != data["password2"]:
@@ -34,12 +34,12 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = CustomUser.objects.create(
-            username = validated_data["username"],
-            email = validated_data["email"],
-            first_name = validated_data["first_name"],
-            last_name = validated_data["last_name"],
-            phone_num = validated_data["phone_num"],
-            avatar = validated_data["avatar"],
+            username=validated_data["username"],
+            email=validated_data["email"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            phone_num=validated_data["phone_num"],
+            avatar=validated_data["avatar"],
         )
 
         user.set_password(validated_data["password"])
@@ -51,7 +51,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class CardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Card
-        fields = ['card_num', 'billing_addr', 'expires_at', 'cvv', 'pmt_option',
+        fields = ['card_num', 'billing_addr', 'expires_at', 'cvv',
                   'holder']
 
     def validate(self, data):
@@ -60,4 +60,9 @@ class CardSerializer(serializers.ModelSerializer):
                                               "Please use another one.")
         return data
 
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'
 
